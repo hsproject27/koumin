@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>札幌南・北志望 公民 聞き流し＆暗記マスター50</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Noto Sans JP', sans-serif; background-color: #0b0f19; color: #f8fafc; -webkit-tap-highlight-color: transparent; }
+    .gold-gradient { background: linear-gradient(135deg, #d4af37 0%, #f3e5ab 50%, #aa7c11 100%); }
+    .red-sheet-hidden { color: transparent !important; background-color: #991b1b; border-radius: 6px; user-select: none; }
+    .card-shadow { box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.7); }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between pb-8">
+
+  <!-- ヘッダー -->
+  <header class="pt-5 pb-3 px-4 border-b border-amber-500/30 bg-slate-950/90 sticky top-0 z-20 backdrop-blur">
+    <div class="max-w-md mx-auto flex items-center justify-between">
+      <div>
+        <span class="text-[10px] tracking-widest text-amber-400 font-bold uppercase block">SAPPORO MINAMI / KITA LEVEL</span>
+        <h1 class="text-lg font-black tracking-tight text-white">公民 暗記マスター <span class="text-amber-400">厳選50</span></h1>
+      </div>
+      <div class="text-right">
+        <span id="masteredCount" class="text-xs font-bold bg-amber-500/20 text-amber-300 px-2.5 py-1 rounded-full border border-amber-500/40">習得 0 / 50</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- メインエリア -->
+  <main class="max-w-md w-full mx-auto px-4 pt-4 flex-1 flex flex-col gap-3">
+
+    <!-- 分野フィルター -->
+    <div class="flex gap-1.5 overflow-x-auto pb-1 text-xs font-bold">
+      <button onclick="setFilter('ALL')" id="filter-ALL" class="filter-btn px-3 py-1.5 rounded-full bg-amber-500 text-slate-950 whitespace-nowrap">すべて(50)</button>
+      <button onclick="setFilter('人権・憲法')" id="filter-人権・憲法" class="filter-btn px-3 py-1.5 rounded-full bg-slate-800 text-slate-300 whitespace-nowrap">人権・憲法</button>
+      <button onclick="setFilter('政治・三権')" id="filter-政治・三権" class="filter-btn px-3 py-1.5 rounded-full bg-slate-800 text-slate-300 whitespace-nowrap">政治・三権</button>
+      <button onclick="setFilter('経済')" id="filter-経済" class="filter-btn px-3 py-1.5 rounded-full bg-slate-800 text-slate-300 whitespace-nowrap">経済</button>
+      <button onclick="setFilter('国際・地方')" id="filter-国際・地方" class="filter-btn px-3 py-1.5 rounded-full bg-slate-800 text-slate-300 whitespace-nowrap">国際・地方</button>
+    </div>
+
+    <!-- コントロールバー -->
+    <div class="grid grid-cols-2 gap-2">
+      <button id="autoPlayBtn" onclick="toggleAutoPlay()" class="py-2.5 px-3 rounded-xl font-bold text-sm bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center gap-1.5 shadow">
+        <span>▶ 聞き流し開始</span>
+      </button>
+      <button id="redSheetBtn" onclick="toggleRedSheet()" class="py-2.5 px-3 rounded-xl font-bold text-sm bg-rose-700 hover:bg-rose-600 text-white flex items-center justify-center gap-1.5 shadow">
+        <span>🟥 赤シート: OFF</span>
+      </button>
+    </div>
+
+    <!-- 問題カード -->
+    <div class="bg-slate-900 border border-amber-500/30 rounded-2xl p-5 card-shadow flex-1 flex flex-col justify-between min-h-[300px]">
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <span id="eraBadge" class="text-xs font-bold px-2.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">分野</span>
+          <span id="progressText" class="text-xs text-slate-400 font-mono">1 / 50</span>
+        </div>
+        <p id="questionText" class="text-lg font-bold leading-relaxed text-white mb-5">読み込み中...</p>
+      </div>
+
+      <!-- 解答・解説エリア -->
+      <div class="border-t border-slate-800 pt-4">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-[11px] text-slate-400 font-bold">【重要語句・解答】</span>
+          <button onclick="speakCurrent()" class="text-xs text-amber-400 font-bold px-2 py-0.5 rounded bg-amber-500/10">🔊 読み上げ</button>
+        </div>
+        <div onclick="revealAnswer()" class="p-3 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer mb-2">
+          <p id="answerText" class="text-xl font-black text-rose-400 tracking-wide">解答</p>
+        </div>
+        <p id="subText" class="text-xs text-slate-300 leading-relaxed bg-slate-800/50 p-2.5 rounded-lg">解説</p>
+      </div>
+    </div>
+
+    <!-- ナビゲーション＆習得ボタン -->
+    <div class="grid grid-cols-3 gap-2 pt-1">
+      <button onclick="prevCard()" class="py-3 rounded-xl bg-slate-800 font-bold text-sm text-slate-200 active:scale-95">◀ 前へ</button>
+      <button id="masterBtn" onclick="toggleMaster()" class="py-3 rounded-xl bg-slate-800 border border-amber-500/40 font-bold text-sm text-amber-300 active:scale-95">☆ 覚えた</button>
+      <button onclick="nextCard()" class="py-3 rounded-xl gold-gradient font-black text-sm text-slate-950 active:scale-95">次へ ▶</button>
+    </div>
+
+  </main>
+
+  <script>
+    const QUESTIONS = [
+      // 人権・憲法 (1〜13)
+      { era: "人権・憲法", q: "個人の尊厳を基礎とし、人間が生まれながらにもっている侵すことのできない永久の権利を何というか。", a: "基本的人権", sub: "憲法11条・97条。公共の福祉に反しない限り尊重される。" },
+      { era: "人権・憲法", q: "日本国憲法の三大原則は「国民主権」「基本的人権の尊重」と、あと1つは何か。", a: "平和主義", sub: "憲法9条で戦争の放棄・戦力の不保持・交戦権の否認を規定。" },
+      { era: "人権・憲法", q: "社会的な身分や門地によって差別されない権利を定めた、憲法14条の「法の下の平等」のうち、男女の雇用機会均等を定めた法律は何か。", a: "男女雇用機会均等法", sub: "1985年制定。募集・採用・昇進などでの性別差別を禁止。" },
+      { era: "人権・憲法", q: "仕事と育児・介護を両立できるよう、男性の育児休業取得促進などを定めた法律は何か。", a: "育児・介護休業法", sub: "少子高齢化対策・働き方改革の重要キーワード。" },
+      { era: "人権・憲法", q: "すべての国民が「健康で文化的な最低限度の生活を営む権利」を何というか（憲法25条）。", a: "生存権", sub: "社会権の中心。生活保護制度などの根拠となる。" },
+      { era: "人権・憲法", q: "公害や環境破壊から守られる権利など、時代の変化にともなって主張されるようになった人権をまとめて何というか。", a: "新しい人権", sub: "環境権・知る権利・プライバシーの権利・自己決定権など。" },
+      { era: "人権・憲法", q: "国や地方公共団体に対して、保有する公文書の公開を求めることができる制度は何か。", a: "情報公開制度", sub: "「知る権利」を保障し、行政の透明性を高める仕組み。" },
+      { era: "人権・憲法", q: "選挙で投票する権利や、国民審査・住民投票など、政治に参加する権利をまとめて何というか。", a: "参政権", sub: "2016年の公職選挙法改正により選挙権年齢が18歳以上に引き下げられた。" },
+      { era: "人権・憲法", q: "裁判を受ける権利や国家賠償請求権など、基本的人権が侵害されたときに国に救済を求める権利を何というか。", a: "請求権", sub: "請願権・刑事補償請求権も含まれる。" },
+      { era: "人権・憲法", q: "日本国憲法の改正には、各議院の総議員のどれだけの賛成による発議と、国民投票での過半数の賛成が必要か。", a: "3分の2以上", sub: "憲法96条。一般の法律よりも改正手続きが厳格（硬性憲法）。" },
+      { era: "人権・憲法", q: "日本の「非核三原則」とは、核兵器を「持たず・作らず」と、あと1つは何か。", a: "持ち込ませず", sub: "1967年に佐藤栄作首相が表明。" },
+      { era: "人権・憲法", q: "国連で採択された、18歳未満のすべての人の権利を定めた条約を何というか。", a: "子どもの権利条約（児童の権利条約）", sub: "1989年採択、日本は1994年に批准。" },
+      { era: "人権・憲法", q: "高齢者や障害の有無にかかわらず、すべての人が利用しやすいように都市や製品を設計する考え方を何というか。", a: "ユニバーサルデザイン", sub: "障壁を取り除く「バリアフリー」から一歩進んだ考え方。" },
+
+      // 政治・三権 (14〜27)
+      { era: "政治・三権", q: "国の権力を「立法・行政・司法」の3つに分け、互いに抑制し均衡を保つ仕組みを何というか。", a: "三権分立", sub: "権力の集中と濫用を防ぎ、国民の自由と権利を守る仕組み。" },
+      { era: "政治・三権", q: "国会は「国権の最高機関」であり、国の唯一の何機関と定められているか（憲法41条）。", a: "立法機関", sub: "法律を制定できるのは国会だけ。" },
+      { era: "政治・三権", q: "衆議院と参議院で議決が異なった場合、一定の条件のもとで衆議院の議決が国会の議決となる仕組みを何というか。", a: "衆議院の優越", sub: "法律案の再議決（出席議員の3分の2以上）、予算の議決、条約の承認、内閣総理大臣の指名で認められる。" },
+      { era: "政治・三権", q: "衆議院の解散後や、任期満了による総選挙のあと、30日以内に必ず召集される国会は何か。", a: "特別会（特別国会）", sub: "内閣総理大臣の指名を行う。毎年1月に召集されるのは「常会（通常国会）」。" },
+      { era: "政治・三権", q: "衆議院議員選挙で採用されている、小選挙区制と比例代表制を組み合わせた選挙制度を何というか。", a: "小選挙区比例代表並立制", sub: "有権者は「候補者名」と「政党名」の2票を投票する。" },
+      { era: "政治・三権", q: "選挙区ごとの有権者数の差によって生じる、1票の価値の不平等を何というか。", a: "一票の格差", sub: "法の下の平等（憲法14条）に反するとして訴訟になることが多い。" },
+      { era: "政治・三権", q: "内閣が国会の信任にもとづいて成立し、国会に対して連帯して責任を負う仕組みを何というか。", a: "議院内閣制", sub: "衆議院で内閣不信任決議案が可決されると、内閣は10日以内に衆議院を解散するか総辞職する。" },
+      { era: "政治・三権", q: "内閣の仕事の1つで、法律を執行するために内閣が制定する命令を何というか。", a: "政令", sub: "予算の作成、条約の締結、最高裁判所長官の指名なども内閣の職務。" },
+      { era: "政治・三権", q: "裁判の公正さを保つため、判決に不服がある場合に上級裁判所にやり直しを求めることができる制度は何か。", a: "三審制", sub: "一審から二審への訴えを「控訴」、二審から三審への訴えを「上告」という。" },
+      { era: "政治・三権", q: "法律や命令・処分が憲法に違反していないかを審査する、裁判所の権限を何というか。", a: "違憲審査権（法令審査権）", sub: "最高裁判所は「憲法の番人」と呼ばれる。" },
+      { era: "政治・三権", q: "犯罪の疑いをかけられた人が、有罪判決が確定するまでは無罪として扱われる原則を何というか。", a: "推定無罪の原則", sub: "令状主義や黙秘権とともに人身の自由を守る重要原則。" },
+      { era: "政治・三権", q: "重大な刑事事件の第一審の裁判に、選挙権をもつ国民から選ばれた人が参加する制度は何か。", a: "裁判員制度", sub: "2009年開始。原則として裁判官3人と裁判員6人で審理する。" },
+      { era: "政治・三権", q: "国家権力からの干渉を受けず、裁判官が憲法と法律のみに従って裁判を行う原則を何というか。", a: "司法権の独立", sub: "裁判官は心身の故障や弾劾裁判などによる場合を除き罷免されない。" },
+      { era: "政治・三権", q: "複数の政党が協力して内閣を組織する政権の形を何というか。", a: "連立政権", sub: "単独の政党で過半数を確保できない場合などに組まれる。" },
+
+      // 経済 (28〜40)
+      { era: "経済", q: "市場経済において、商品の価格が上がると供給量は増え、価格が下がると需要量が増える働きによって決まる価格を何というか。", a: "均衡価格", sub: "需要量と供給量が一致するときの価格。" },
+      { era: "経済", q: "少数の大企業が市場を支配し、価格が下がりにくくなる状態を何というか。", a: "寡占（かせん）", sub: "1社だけで支配する状態は「独占」。独占禁止法で規制される。" },
+      { era: "経済", q: "株式会社において、株主総会で選ばれ、会社の経営方針を決定・実行する機関は何か。", a: "取締役会（取締役）", sub: "株主は出資額に応じた配当を受け取り、有限責任を負う。" },
+      { era: "経済", q: "日本の「労働三権」とは、団結権・団体交渉権と、あと1つは何か。", a: "団体行動権（争議権）", sub: "ストライキなどを行う権利。労働組合法で具体的に保障。" },
+      { era: "経済", q: "物の値段が継続的に上がり続け、相対的にお金の価値が下がる現象を何というか。", a: "インフレーション（インフレ）", sub: "逆に物価が継続的に下がり続ける現象は「デフレーション（デフレ）」。" },
+      { era: "経済", q: "日本銀行が「発券銀行」「銀行の銀行」とともにもつ、政府の税金の受け入れや国債の事務を行う役割は何か。", a: "政府の銀行", sub: "日銀は公開市場操作（オペレーション）で世の中の通貨量を調節する。" },
+      { era: "経済", q: "好況期には国債を売り、不況期には国債を買い入れることで景気を安定させる日本銀行の金融政策を何というか。", a: "公開市場操作（オペレーション）", sub: "不況時は国債を買い入れて市中の資金を増やし、金利を下げる。" },
+      { era: "経済", q: "所得が高い人ほど高い税率が適用され、所得の再分配の働きをもつ税の仕組みを何というか。", a: "累進課税制度", sub: "所得税や相続税に適用される直接税の特徴。" },
+      { era: "経済", q: "税金が課される人と実際に負担する人が異なる税金（消費税や酒税など）を何というか。", a: "間接税", sub: "納税者と担税者が同じなのは「直接税」（所得税・法人税など）。" },
+      { era: "経済", q: "国の歳入の不足を補うために発行する借金を何というか。", a: "国債（公債）", sub: "建設国債と特例国債（赤字国債）がある。" },
+      { era: "経済", q: "日本の社会保障制度の4つの柱は「社会保険」「公的扶助」「社会福祉」と、あと1つは何か。", a: "公衆衛生", sub: "少子高齢化により社会保障給付費は年々増加している。" },
+      { era: "経済", q: "円高になると、日本の輸出産業と輸入産業のどちらに有利になるか。", a: "輸入産業", sub: "円高＝円の価値が上がるため、外国の製品や資源を安く買える。" },
+      { era: "経済", q: "企業の利益追求だけでなく、環境保護や地域貢献など社会的責任を果たす取り組みをアルファベット3文字で何というか。", a: "CSR（企業の社会的責任）", sub: "持続可能な社会の実現に向けて重視されている。" },
+
+      // 国際・地方 (41〜50)
+      { era: "国際・地方", q: "地域の住民が自ら地域の政治に参加する「住民自治」と、国から独立した団体が処理する「団体自治」からなる仕組みを何というか。", a: "地方自治", sub: "地方自治は「民主主義の学校」と呼ばれる。" },
+      { era: "国際・地方", q: "地方公共団体が、国の法律の範囲内で独自に制定できる法規を何というか。", a: "条例", sub: "北海道の環境保全条例や、札幌市の路上喫煙制限条例など。" },
+      { era: "国際・地方", q: "有権者の一定数以上の署名を集めることで、条例の制定・改廃や議会の解散、首長の解職（リコール）を請求できる住民の権利を何というか。", a: "直接請求権", sub: "条例の制定・改廃は有権者の50分の1以上、リコールは3分の1以上の署名が必要。" },
+      { era: "国際・地方", q: "国から地方公共団体へ使途を指定せずに交付され、自治体間の財政力の格差を是正するお金は何か。", a: "地方交付税交付金", sub: "使い道が指定されているのは「国庫支出金」。自主財源は「地方税」。" },
+      { era: "国際・地方", q: "国際連合の主要機関のうち、世界の平和と安全の維持に責任をもち、5つの常任理事国が拒否権をもつ機関は何か。", a: "安全保障理事会", sub: "常任理事国はアメリカ・イギリス・フランス・ロシア・中国の5か国。" },
+      { era: "国際・地方", q: "国連の平和維持活動をアルファベット3文字で何というか。", a: "PKO（国連平和維持活動）", sub: "停戦監視や復興支援などを行う。自衛隊もPKO協力法に基づき派遣。" },
+      { era: "国際・地方", q: "発展途上国の経済発展や福祉向上のために、先進国が行う政府開発援助をアルファベット3文字で何というか。", a: "ODA（政府開発援助）", sub: "資金協力や技術協力などを行う。" },
+      { era: "国際・地方", q: "特定の国や地域の間で関税や貿易制限をなくし、自由な貿易を進める協定を何というか。", a: "FTA（自由貿易協定）", sub: "人の移動や投資ルールまで含めた幅広い協定は「EPA（経済連携協定）」。" },
+      { era: "国際・地方", q: "国境を越えて活動する非政府組織をNGOというのに対し、民間企業が営利目的で複数の国に拠点を置いて活動する企業を何というか。", a: "多国籍企業", sub: "経済のグローバル化を象徴する存在。" },
+      { era: "国際・地方", q: "2015年の国連サミットで採択された、2030年までに達成すべき17の「持続可能な開発目標」を何というか。", a: "SDGs", sub: "貧困の撲滅・気候変動対策・ジェンダー平等など17目標・169ターゲット。" }
+    ];
+
+    let currentFilter = 'ALL';
+    let filteredList = [...QUESTIONS];
+    let currentIndex = 0;
+    let isRedSheet = false;
+    let isAutoPlaying = false;
+    let autoTimer = null;
+    let masteredSet = new Set(JSON.parse(localStorage.getItem('koumin_mastered_50') || '[]'));
+
+    function updateMasteredBadge() {
+      document.getElementById('masteredCount').textContent = `習得 ${masteredSet.size} / ${QUESTIONS.length}`;
+    }
+
+    function setFilter(era) {
+      currentFilter = era;
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.className = 'filter-btn px-3 py-1.5 rounded-full bg-slate-800 text-slate-300 whitespace-nowrap';
+      });
+      document.getElementById(`filter-${era}`).className = 'filter-btn px-3 py-1.5 rounded-full bg-amber-500 text-slate-950 whitespace-nowrap';
+
+      filteredList = era === 'ALL' ? [...QUESTIONS] : QUESTIONS.filter(item => item.era === era);
+      currentIndex = 0;
+      renderCard();
+    }
+
+    function renderCard() {
+      const item = filteredList[currentIndex];
+      const globalIdx = QUESTIONS.indexOf(item);
+      document.getElementById('eraBadge').textContent = item.era;
+      document.getElementById('progressText').textContent = `${currentIndex + 1} / ${filteredList.length}`;
+      document.getElementById('questionText').textContent = item.q;
+      
+      const ansEl = document.getElementById('answerText');
+      ansEl.textContent = item.a;
+      if (isRedSheet) {
+        ansEl.classList.add('red-sheet-hidden');
+      } else {
+        ansEl.classList.remove('red-sheet-hidden');
+      }
+      document.getElementById('subText').textContent = item.sub;
+
+      const masterBtn = document.getElementById('masterBtn');
+      if (masteredSet.has(globalIdx)) {
+        masterBtn.textContent = '★ 習得済';
+        masterBtn.classList.add('bg-amber-500/20');
+      } else {
+        masterBtn.textContent = '☆ 覚えた';
+        masterBtn.classList.remove('bg-amber-500/20');
+      }
+      updateMasteredBadge();
+    }
+
+    function revealAnswer() {
+      document.getElementById('answerText').classList.remove('red-sheet-hidden');
+    }
+
+    function toggleRedSheet() {
+      isRedSheet = !isRedSheet;
+      const btn = document.getElementById('redSheetBtn');
+      btn.textContent = isRedSheet ? '🟥 赤シート: ON' : '🟥 赤シート: OFF';
+      renderCard();
+    }
+
+    function toggleMaster() {
+      const item = filteredList[currentIndex];
+      const globalIdx = QUESTIONS.indexOf(item);
+      if (masteredSet.has(globalIdx)) {
+        masteredSet.delete(globalIdx);
+      } else {
+        masteredSet.add(globalIdx);
+      }
+      localStorage.setItem('koumin_mastered_50', JSON.stringify([...masteredSet]));
+      renderCard();
+    }
+
+    function nextCard() {
+      currentIndex = (currentIndex + 1) % filteredList.length;
+      renderCard();
+      if (isAutoPlaying) speakCurrent(true);
+    }
+
+    function prevCard() {
+      currentIndex = (currentIndex - 1 + filteredList.length) % filteredList.length;
+      renderCard();
+    }
+
+    function speakText(text, onEndCallback) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const uttr = new SpeechSynthesisUtterance(text);
+      uttr.lang = 'ja-JP';
+      uttr.rate = 1.05;
+      if (onEndCallback) uttr.onend = onEndCallback;
+      window.speechSynthesis.speak(uttr);
+    }
+
+    function speakCurrent(autoNext = false) {
+      const item = filteredList[currentIndex];
+      speakText(`問題。${item.q}`, () => {
+        if (!autoNext && !isAutoPlaying) return;
+        autoTimer = setTimeout(() => {
+          revealAnswer();
+          speakText(`答えは、${item.a}。${item.sub}`, () => {
+            if (isAutoPlaying) {
+              autoTimer = setTimeout(() => nextCard(), 1500);
+            }
+          });
+        }, 1800);
+      });
+    }
+
+    function toggleAutoPlay() {
+      isAutoPlaying = !isAutoPlaying;
+      const btn = document.getElementById('autoPlayBtn');
+      if (isAutoPlaying) {
+        btn.textContent = '⏹ 聞き流し停止';
+        btn.classList.replace('bg-emerald-600', 'bg-amber-600');
+        speakCurrent(true);
+      } else {
+        btn.textContent = '▶ 聞き流し開始';
+        btn.classList.replace('bg-amber-600', 'bg-emerald-600');
+        window.speechSynthesis.cancel();
+        clearTimeout(autoTimer);
+      }
+    }
+
+    renderCard();
+  </script>
+</body>
+</html>
